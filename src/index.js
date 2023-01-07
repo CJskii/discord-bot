@@ -12,7 +12,8 @@ const prefix = "!";
 
 const embed = require("./embed");
 // Replace with your Discord bot's token
-const DISCORD_BOT_TOKEN = "TOKEN_HERE";
+const DISCORD_BOT_TOKEN =
+  "MTAwNTk4MjkyNzY1NTUzNDcwNA.GZERJX.GIVcJsupZoicz7wBidZ4e2jUFIwadFC7-zWIG4";
 
 // Replace with the ID of your Google Drive spreadsheet
 const SPREADSHEET_ID = "1yFt-bFQol0IF_737jUiDXhlt3jRTSwSU8CHNvveGYqs";
@@ -75,9 +76,30 @@ client.on("ready", () => {
       const rows = data.values;
       const channel = client.channels.cache.get("1048058181215064124"); // Replace with channel ID from discord
 
-      deleteLastMessage(channel);
+      // Embed constructor
 
-      //formatLeaderboard(rows);
+      const leaderboardEmbed = new EmbedBuilder()
+        .setColor(0x0099ff)
+        .setTitle("Leaderboard")
+        .setURL("https://twitter.com/LearnWeb3DAO")
+        .setAuthor({
+          name: "LearnWeb3",
+          iconURL:
+            "https://pbs.twimg.com/profile_images/1583101110608400385/FkTz9xEl_400x400.jpg",
+          url: "https://twitter.com/LearnWeb3DAO",
+        })
+        .setDescription("#100DaysOfCode")
+        .setThumbnail("https://i.imgur.com/2ZZl1H3.png")
+        .setImage("https://i.imgur.com/nfEDbrh.png")
+        .setTimestamp()
+        .setFooter({
+          text: "Last updated",
+          iconURL:
+            "https://pbs.twimg.com/profile_images/1583101110608400385/FkTz9xEl_400x400.jpg",
+        });
+
+      deleteLastMessage(channel);
+      formatLeaderboard(rows, leaderboardEmbed);
 
       // Send the data to the Discord channel
       //channel.send(`Here is the leaderboard:\n${formatLeaderboard(rows)}`);
@@ -89,7 +111,7 @@ client.on("ready", () => {
 });
 
 // Formats the leaderboard data
-function formatLeaderboard(rows) {
+function formatLeaderboard(rows, leaderboardEmbed) {
   let users = [];
   rows.forEach((row) => {
     users.push({ username: row[2], daysOfCoding: row[5] });
@@ -111,19 +133,30 @@ function formatLeaderboard(rows) {
   // Sort the array in descending order based on the number of days of coding
   leaderboardArray.sort((a, b) => b.daysOfCoding - a.daysOfCoding);
 
-  let leaderboardString = "";
-
-  for (let i = 1; i < leaderboardArray.length; i++) {
-    const entry = leaderboardArray[i];
-    leaderboardString += `${i}. ${entry.username}: ${entry.daysOfCoding}\n`;
+  // Add placement
+  for (let i = 0; i < leaderboardArray.length; i++) {
+    leaderboardArray[i].placement = i;
   }
 
-  const firstEntry = leaderboardArray[0];
-  leaderboardString = `Placement : ${firstEntry.username}: ${firstEntry.daysOfCoding}\n${leaderboardString}`;
-
-  console.log(leaderboardString);
-
-  return leaderboardString;
+  // Leaderboard name/value constructor
+  leaderboardArray.forEach((entry) => {
+    if (entry.placement != 0) {
+      let name;
+      if (entry.placement == 1) {
+        name = `** :trophy: ${entry.placement}. ${entry.username}**`;
+      } else if (entry.placement == 2) {
+        name = `** :second_place: ${entry.placement}. ${entry.username}**`;
+      } else if (entry.placement == 3) {
+        name = `** :third_place: ${entry.placement}. ${entry.username}**`;
+      } else {
+        name = `**${entry.placement}. ${entry.username}**`;
+      }
+      leaderboardEmbed.addFields({
+        name: name,
+        value: `\`Days coding\` | \`${entry.daysOfCoding}\``,
+      });
+    }
+  });
 }
 
 // DELETE MESSAGE FROM THE CHANNEL
@@ -134,40 +167,3 @@ function deleteLastMessage(channel) {
     messages.first().delete();
   });
 }
-
-// EMBED
-
-const leaderboardEmbed = new EmbedBuilder()
-  .setColor(0x0099ff)
-  .setTitle("Leaderboard")
-  .setURL("https://twitter.com/LearnWeb3DAO")
-  .setAuthor({
-    name: "LearnWeb3",
-    iconURL:
-      "https://pbs.twimg.com/profile_images/1583101110608400385/FkTz9xEl_400x400.jpg",
-    url: "https://twitter.com/LearnWeb3DAO",
-  })
-  .setDescription("#100DaysOfCode")
-  .setThumbnail("https://i.imgur.com/2ZZl1H3.png")
-  .addFields(
-    { name: "Regular field title", value: "Some value here" },
-    { name: "\u200B", value: "\u200B" },
-    {
-      name: "Inline field title",
-      value: "Some value here",
-      inline: true,
-    },
-    { name: "Inline field title", value: "Some value here", inline: true }
-  )
-  .addFields({
-    name: "Inline field title",
-    value: "Some value here",
-    inline: true,
-  })
-  .setImage("https://i.imgur.com/nfEDbrh.png")
-  .setTimestamp()
-  .setFooter({
-    text: "Last updated",
-    iconURL:
-      "https://pbs.twimg.com/profile_images/1583101110608400385/FkTz9xEl_400x400.jpg",
-  });
