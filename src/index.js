@@ -12,8 +12,7 @@ const prefix = "!";
 
 const embed = require("./embed");
 // Replace with your Discord bot's token
-const DISCORD_BOT_TOKEN =
-  "MTAwNTk4MjkyNzY1NTUzNDcwNA.GZERJX.GIVcJsupZoicz7wBidZ4e2jUFIwadFC7-zWIG4";
+const DISCORD_BOT_TOKEN = "YOUR_TOKEN_HERE";
 
 // Replace with the ID of your Google Drive spreadsheet
 const SPREADSHEET_ID = "1yFt-bFQol0IF_737jUiDXhlt3jRTSwSU8CHNvveGYqs";
