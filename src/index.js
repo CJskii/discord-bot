@@ -6,13 +6,13 @@ const {
   Premissions,
   ModalAssertions,
 } = require(`discord.js`);
-
 const { google } = require("googleapis");
 
 const prefix = "!";
 
+const embed = require("./embed");
 // Replace with your Discord bot's token
-const DISCORD_BOT_TOKEN = "";
+const DISCORD_BOT_TOKEN = "TOKEN_HERE";
 
 // Replace with the ID of your Google Drive spreadsheet
 const SPREADSHEET_ID = "1yFt-bFQol0IF_737jUiDXhlt3jRTSwSU8CHNvveGYqs";
@@ -73,18 +73,19 @@ client.on("ready", () => {
         });
       const data = response.data;
       const rows = data.values;
-
-      // Send the data to the Discord channel
       const channel = client.channels.cache.get("1048058181215064124"); // Replace with channel ID from discord
 
       deleteLastMessage(channel);
 
       //formatLeaderboard(rows);
-      channel.send(`Here is the leaderboard:\n${formatLeaderboard(rows)}`);
+
+      // Send the data to the Discord channel
+      //channel.send(`Here is the leaderboard:\n${formatLeaderboard(rows)}`);
+      channel.send({ embeds: [leaderboardEmbed] });
     } catch (error) {
       console.error(error);
     }
-  }, 30 * 1000); // 3600 * 1000 milliseconds = 1 hour
+  }, 15 * 1000); // 3600 * 1000 milliseconds = 1 hour
 });
 
 // Formats the leaderboard data
@@ -120,7 +121,6 @@ function formatLeaderboard(rows) {
   const firstEntry = leaderboardArray[0];
   leaderboardString = `Placement : ${firstEntry.username}: ${firstEntry.daysOfCoding}\n${leaderboardString}`;
 
-  console.log(embed);
   console.log(leaderboardString);
 
   return leaderboardString;
@@ -134,3 +134,40 @@ function deleteLastMessage(channel) {
     messages.first().delete();
   });
 }
+
+// EMBED
+
+const leaderboardEmbed = new EmbedBuilder()
+  .setColor(0x0099ff)
+  .setTitle("Leaderboard")
+  .setURL("https://twitter.com/LearnWeb3DAO")
+  .setAuthor({
+    name: "LearnWeb3",
+    iconURL:
+      "https://pbs.twimg.com/profile_images/1583101110608400385/FkTz9xEl_400x400.jpg",
+    url: "https://twitter.com/LearnWeb3DAO",
+  })
+  .setDescription("#100DaysOfCode")
+  .setThumbnail("https://i.imgur.com/2ZZl1H3.png")
+  .addFields(
+    { name: "Regular field title", value: "Some value here" },
+    { name: "\u200B", value: "\u200B" },
+    {
+      name: "Inline field title",
+      value: "Some value here",
+      inline: true,
+    },
+    { name: "Inline field title", value: "Some value here", inline: true }
+  )
+  .addFields({
+    name: "Inline field title",
+    value: "Some value here",
+    inline: true,
+  })
+  .setImage("https://i.imgur.com/nfEDbrh.png")
+  .setTimestamp()
+  .setFooter({
+    text: "Last updated",
+    iconURL:
+      "https://pbs.twimg.com/profile_images/1583101110608400385/FkTz9xEl_400x400.jpg",
+  });
