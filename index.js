@@ -12,7 +12,7 @@ const { google } = require("googleapis");
 const prefix = "!";
 
 // Replace with your Discord bot's token
-const DISCORD_BOT_TOKEN = "TOKEN_HERE";
+const DISCORD_BOT_TOKEN = "";
 
 // Replace with the ID of your Google Drive spreadsheet
 const SPREADSHEET_ID = "1yFt-bFQol0IF_737jUiDXhlt3jRTSwSU8CHNvveGYqs";
@@ -73,8 +73,12 @@ client.on("ready", () => {
         });
       const data = response.data;
       const rows = data.values;
+
       // Send the data to the Discord channel
       const channel = client.channels.cache.get("1048058181215064124"); // Replace with channel ID from discord
+
+      deleteLastMessage(channel);
+
       //formatLeaderboard(rows);
       channel.send(`Here is the leaderboard:\n${formatLeaderboard(rows)}`);
     } catch (error) {
@@ -116,7 +120,17 @@ function formatLeaderboard(rows) {
   const firstEntry = leaderboardArray[0];
   leaderboardString = `Placement : ${firstEntry.username}: ${firstEntry.daysOfCoding}\n${leaderboardString}`;
 
+  console.log(embed);
   console.log(leaderboardString);
 
   return leaderboardString;
+}
+
+// DELETE MESSAGE FROM THE CHANNEL
+
+function deleteLastMessage(channel) {
+  channel.messages.fetch({ limit: 1 }).then((messages) => {
+    // Delete the last message
+    messages.first().delete();
+  });
 }
