@@ -19,6 +19,7 @@
   "homepage": "https://github.com/CJskii/discord-bot#readme",
   "dependencies": {
     "discord.js": "^14.7.1",
+    "dotenv": "^16.0.3",
     "google-auth-library": "^8.7.0",
     "google-sheets": "^0.0.7",
     "googleapis": "^110.0.0"
