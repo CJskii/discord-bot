@@ -1,17 +1,11 @@
-const {
-  Client,
-  GatewayIntentBits,
-  EmbedBuilder,
-  PermissionsBitField,
-  Premissions,
-  ModalAssertions,
-} = require(`discord.js`);
+const { Client, GatewayIntentBits, EmbedBuilder } = require(`discord.js`);
 const { google } = require("googleapis");
+require("dotenv").config();
 
 const prefix = "!";
 
 // Replace with your Discord bot's token
-const DISCORD_BOT_TOKEN = "TOKEN_HERE";
+const DISCORD_BOT_TOKEN = process.env.DISCORD_TOKEN;
 
 // Replace with the ID of your Google Drive spreadsheet
 const SPREADSHEET_ID = "1yFt-bFQol0IF_737jUiDXhlt3jRTSwSU8CHNvveGYqs";
@@ -35,63 +29,28 @@ let messageToEdit;
 
 client.on("ready", () => {
   console.log(`Logged in as ${client.user.tag}!`);
-
+  getEmbed();
   // Fetch data from the Google Drive spreadsheet every hour
   setInterval(async () => {
-    try {
-      // Authenticate with Google using the API credentials
-      const auth = await google.auth.getClient({
-        credentials,
-        scopes: ["https://www.googleapis.com/auth/drive.readonly"],
-      });
-
-      // Get the data from the spreadsheet
-      const response = await google
-        .sheets({ version: "v4", auth })
-        .spreadsheets.values.get({
-          spreadsheetId: SPREADSHEET_ID,
-          range: "Sheet1!A1:F", // Replace with the range of cells you want to retrieve
-        });
-      const data = response.data;
-      const rows = data.values;
-      const channel = client.channels.cache.get("1048058181215064124"); // Replace with channel ID from discord
-      const leaderboardEmbed = createEmbed();
-      formatLeaderboard(rows, leaderboardEmbed);
-      // Send the data to the Discord channel
-      const timestamp = getTimestamp();
-      if (messageToEdit) {
-        // If the message has already been sent, edit it with the new data
-        messageToEdit
-          .edit({ embeds: [leaderboardEmbed] })
-          .then((msg) => console.log(`[${timestamp}] Updated message content`))
-          .catch(console.error);
-      } else {
-        // If the message has not been sent yet, send it and store the message object
-        messageToEdit = await channel.send({ embeds: [leaderboardEmbed] });
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  }, 15 * 1000); // 3600 * 1000 milliseconds = 1 hour
+    getEmbed();
+  }, 3600 * 1000); // 3600 * 1000 milliseconds = 1 hour
 });
 
 // New message
 
 client.on("messageCreate", async (message) => {
-  if (!message.content.startsWith(prefix) || message.author.bot) return;
+  if (message.author.bot) return;
   const args = message.content.slice(prefix.length).split(/ +/);
   const command = args.shift().toLowerCase();
-
-  // message array
-
-  const messageArray = message.content.split(" ");
-  const argument = messageArray.slice(1);
-  const cmd = messageArray[0];
+  const channel = client.channels.cache.get("1048058181215064124"); // Replace with channel ID from discord
 
   // COMMANDS
 
-  if (command === "leaderboard") {
-    message.channel.send("leaderboard will be sent here on request");
+  if (command === "leaderboard" && messageToEdit) {
+    deleteLastMessage(channel);
+    getEmbed();
+  } else {
+    deleteLastMessage(channel);
   }
 });
 
@@ -99,6 +58,7 @@ client.on("messageCreate", async (message) => {
 function formatLeaderboard(rows, leaderboardEmbed) {
   let users = [];
   rows.forEach((row) => {
+    // Create Array for user objects
     users.push({ username: row[2], daysOfCoding: row[5] });
   });
 
@@ -157,7 +117,7 @@ function deleteLastMessage(channel) {
 
 function createEmbed() {
   // Embed constructor
-
+  // Change values below to edit embed
   const leaderboardEmbed = new EmbedBuilder()
     .setColor(0x0099ff)
     .setTitle("Leaderboard")
@@ -193,4 +153,41 @@ function getTimestamp() {
     second: "numeric",
   });
   return timestamp;
+}
+
+async function getEmbed() {
+  try {
+    // Authenticate with Google using the API credentials
+    const auth = await google.auth.getClient({
+      credentials,
+      scopes: ["https://www.googleapis.com/auth/drive.readonly"],
+    });
+
+    // Get the data from the spreadsheet
+    const response = await google
+      .sheets({ version: "v4", auth })
+      .spreadsheets.values.get({
+        spreadsheetId: SPREADSHEET_ID,
+        range: "Sheet1!A1:F", // Replace with the range of cells you want to retrieve
+      });
+    const data = response.data;
+    const rows = data.values;
+    const channel = client.channels.cache.get("1048058181215064124"); // Replace with channel ID from discord
+    const leaderboardEmbed = createEmbed();
+    formatLeaderboard(rows, leaderboardEmbed);
+    // Send the data to the Discord channel
+    const timestamp = getTimestamp();
+    if (messageToEdit) {
+      // If the message has already been sent, edit it with the new data
+      messageToEdit
+        .edit({ embeds: [leaderboardEmbed] })
+        .then((msg) => console.log(`[${timestamp}] Updated message content`))
+        .catch(console.error);
+    } else {
+      // If the message has not been sent yet, send it and store the message object
+      messageToEdit = await channel.send({ embeds: [leaderboardEmbed] });
+    }
+  } catch (error) {
+    console.error(error);
+  }
 }
