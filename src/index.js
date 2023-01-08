@@ -10,9 +10,8 @@ const { google } = require("googleapis");
 
 const prefix = "!";
 
-const embed = require("./embed");
 // Replace with your Discord bot's token
-const DISCORD_BOT_TOKEN = "YOUR_TOKEN_HERE";
+const DISCORD_BOT_TOKEN = "TOKEN_HERE";
 
 // Replace with the ID of your Google Drive spreadsheet
 const SPREADSHEET_ID = "1yFt-bFQol0IF_737jUiDXhlt3jRTSwSU8CHNvveGYqs";
@@ -32,25 +31,7 @@ const client = new Client({
 // BOT LOGIN
 client.login(DISCORD_BOT_TOKEN);
 
-// New message
-
-client.on("messageCreate", async (message) => {
-  if (!message.content.startsWith(prefix) || message.author.bot) return;
-  const args = message.content.slice(prefix.length).split(/ +/);
-  const command = args.shift().toLowerCase();
-
-  // message array
-
-  const messageArray = message.content.split(" ");
-  const argument = messageArray.slice(1);
-  const cmd = messageArray[0];
-
-  // COMMANDS
-
-  if (command === "leaderboard") {
-    message.channel.send("leaderboard will be sent here on request");
-  }
-});
+let messageToEdit;
 
 client.on("ready", () => {
   console.log(`Logged in as ${client.user.tag}!`);
@@ -74,39 +55,44 @@ client.on("ready", () => {
       const data = response.data;
       const rows = data.values;
       const channel = client.channels.cache.get("1048058181215064124"); // Replace with channel ID from discord
-
-      // Embed constructor
-
-      const leaderboardEmbed = new EmbedBuilder()
-        .setColor(0x0099ff)
-        .setTitle("Leaderboard")
-        .setURL("https://twitter.com/LearnWeb3DAO")
-        .setAuthor({
-          name: "LearnWeb3",
-          iconURL:
-            "https://pbs.twimg.com/profile_images/1583101110608400385/FkTz9xEl_400x400.jpg",
-          url: "https://twitter.com/LearnWeb3DAO",
-        })
-        .setDescription("#100DaysOfCode")
-        .setThumbnail("https://i.imgur.com/2ZZl1H3.png")
-        .setImage("https://i.imgur.com/nfEDbrh.png")
-        .setTimestamp()
-        .setFooter({
-          text: "Last updated",
-          iconURL:
-            "https://pbs.twimg.com/profile_images/1583101110608400385/FkTz9xEl_400x400.jpg",
-        });
-
-      deleteLastMessage(channel);
+      const leaderboardEmbed = createEmbed();
       formatLeaderboard(rows, leaderboardEmbed);
-
       // Send the data to the Discord channel
-      //channel.send(`Here is the leaderboard:\n${formatLeaderboard(rows)}`);
-      channel.send({ embeds: [leaderboardEmbed] });
+      const timestamp = getTimestamp();
+      if (messageToEdit) {
+        // If the message has already been sent, edit it with the new data
+        messageToEdit
+          .edit({ embeds: [leaderboardEmbed] })
+          .then((msg) => console.log(`[${timestamp}] Updated message content`))
+          .catch(console.error);
+      } else {
+        // If the message has not been sent yet, send it and store the message object
+        messageToEdit = await channel.send({ embeds: [leaderboardEmbed] });
+      }
     } catch (error) {
       console.error(error);
     }
   }, 15 * 1000); // 3600 * 1000 milliseconds = 1 hour
+});
+
+// New message
+
+client.on("messageCreate", async (message) => {
+  if (!message.content.startsWith(prefix) || message.author.bot) return;
+  const args = message.content.slice(prefix.length).split(/ +/);
+  const command = args.shift().toLowerCase();
+
+  // message array
+
+  const messageArray = message.content.split(" ");
+  const argument = messageArray.slice(1);
+  const cmd = messageArray[0];
+
+  // COMMANDS
+
+  if (command === "leaderboard") {
+    message.channel.send("leaderboard will be sent here on request");
+  }
 });
 
 // Formats the leaderboard data
@@ -165,4 +151,46 @@ function deleteLastMessage(channel) {
     // Delete the last message
     messages.first().delete();
   });
+}
+
+// EMBED
+
+function createEmbed() {
+  // Embed constructor
+
+  const leaderboardEmbed = new EmbedBuilder()
+    .setColor(0x0099ff)
+    .setTitle("Leaderboard")
+    .setURL("https://twitter.com/LearnWeb3DAO")
+    .setAuthor({
+      name: "LearnWeb3",
+      iconURL:
+        "https://pbs.twimg.com/profile_images/1583101110608400385/FkTz9xEl_400x400.jpg",
+      url: "https://twitter.com/LearnWeb3DAO",
+    })
+    .setDescription("#100DaysOfCode")
+    .setThumbnail("https://i.imgur.com/2ZZl1H3.png")
+    .setImage("https://i.imgur.com/nfEDbrh.png")
+    .setTimestamp()
+    .setFooter({
+      text: "Last updated",
+      iconURL:
+        "https://pbs.twimg.com/profile_images/1583101110608400385/FkTz9xEl_400x400.jpg",
+    });
+
+  return leaderboardEmbed;
+}
+
+// GET TIME
+
+function getTimestamp() {
+  const timestamp = new Date().toLocaleString("eu", {
+    day: "numeric",
+    month: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    second: "numeric",
+  });
+  return timestamp;
 }
