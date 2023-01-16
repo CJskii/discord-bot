@@ -82,10 +82,10 @@ function formatLeaderboard(rows, leaderboardEmbed) {
   for (let i = 0; i < leaderboardArray.length; i++) {
     leaderboardArray[i].placement = i;
   }
-
+  console.log(leaderboardArray);
   // Leaderboard name/value constructor
   leaderboardArray.forEach((entry) => {
-    if (entry.placement != 0) {
+    if (entry.placement != 0 && entry.placement <= 10) {
       let name;
       if (entry.placement == 1) {
         name = `** :trophy: ${entry.placement}. ${entry.username}**`;
@@ -121,14 +121,16 @@ function createEmbed() {
   const leaderboardEmbed = new EmbedBuilder()
     .setColor(0x0099ff)
     .setTitle("Leaderboard")
-    .setURL("https://twitter.com/LearnWeb3DAO")
+    .setURL(
+      "https://docs.google.com/spreadsheets/d/1ifq06TD9qtnrSM5psbPAENktSXRM60RGUOtmDrMJgvk/edit#gid=552958224"
+    )
     .setAuthor({
       name: "LearnWeb3",
       iconURL:
         "https://pbs.twimg.com/profile_images/1583101110608400385/FkTz9xEl_400x400.jpg",
       url: "https://twitter.com/LearnWeb3DAO",
     })
-    .setDescription("#100DaysOfCode")
+    .setDescription("#100DaysOfCodeLW3")
     .setThumbnail("https://i.imgur.com/2ZZl1H3.png")
     .setImage("https://i.imgur.com/nfEDbrh.png")
     .setTimestamp()
