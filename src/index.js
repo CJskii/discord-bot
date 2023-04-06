@@ -8,7 +8,7 @@ const prefix = "!";
 const DISCORD_BOT_TOKEN = process.env.DISCORD_TOKEN;
 
 // Replace with the ID of your Google Drive spreadsheet
-const SPREADSHEET_ID = "1yFt-bFQol0IF_737jUiDXhlt3jRTSwSU8CHNvveGYqs";
+const SPREADSHEET_ID = "1ifq06TD9qtnrSM5psbPAENktSXRM60RGUOtmDrMJgvk";
 
 // Replace with your Google API credentials
 const credentials = require("./credentials.json");
@@ -33,7 +33,7 @@ client.on("ready", () => {
   // Fetch data from the Google Drive spreadsheet every hour
   setInterval(async () => {
     getEmbed();
-  }, 3600 * 1000); // 3600 * 1000 milliseconds = 1 hour
+  }, 300 * 1000); // 3600 * 1000 milliseconds = 1 hour
 });
 
 // New message
@@ -174,21 +174,26 @@ async function getEmbed() {
       });
     const data = response.data;
     const rows = data.values;
-    const channel = client.channels.cache.get("1048058181215064124"); // Replace with channel ID from discord
+    const channel = client.channels.cache.get("1048058181215064124");
+    const messageID = "1093680184529530881"; // Replace with channel ID from discord
     const leaderboardEmbed = createEmbed();
     formatLeaderboard(rows, leaderboardEmbed);
-    // Send the data to the Discord channel
-    const timestamp = getTimestamp();
-    if (messageToEdit) {
-      // If the message has already been sent, edit it with the new data
-      messageToEdit
-        .edit({ embeds: [leaderboardEmbed] })
-        .then((msg) => console.log(`[${timestamp}] Updated message content`))
-        .catch(console.error);
-    } else {
-      // If the message has not been sent yet, send it and store the message object
-      messageToEdit = await channel.send({ embeds: [leaderboardEmbed] });
-    }
+
+    // Fetch the message with the specified ID
+    channel.messages
+      .fetch(messageID)
+      .then((messageToEdit) => {
+        // If the message exists, edit it with the new data
+        const timestamp = getTimestamp();
+        messageToEdit
+          .edit({ embeds: [leaderboardEmbed] })
+          .then((msg) => console.log(`[${timestamp}] Updated message content`))
+          .catch(console.error);
+      })
+      .catch(async () => {
+        // If the message doesn't exist, send a new one
+        await channel.send({ embeds: [leaderboardEmbed] });
+      });
   } catch (error) {
     console.error(error);
   }
