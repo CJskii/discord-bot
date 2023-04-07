@@ -36,24 +36,6 @@ client.on("ready", () => {
   }, 300 * 1000); // 3600 * 1000 milliseconds = 1 hour
 });
 
-// New message
-
-client.on("messageCreate", async (message) => {
-  if (message.author.bot) return;
-  const args = message.content.slice(prefix.length).split(/ +/);
-  const command = args.shift().toLowerCase();
-  const channel = client.channels.cache.get("1048058181215064124"); // Replace with channel ID from discord
-
-  // COMMANDS
-
-  if (command === "leaderboard" && messageToEdit) {
-    deleteLastMessage(channel);
-    getEmbed();
-  } else {
-    deleteLastMessage(channel);
-  }
-});
-
 // Formats the leaderboard data
 function formatLeaderboard(rows, leaderboardEmbed) {
   let users = [];
@@ -174,6 +156,7 @@ async function getEmbed() {
       });
     const data = response.data;
     const rows = data.values;
+
     const channel = client.channels.cache.get("1048058181215064124");
     const messageID = "1093680184529530881"; // Replace with channel ID from discord
     const leaderboardEmbed = createEmbed();
