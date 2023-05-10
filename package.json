@@ -22,7 +22,8 @@
     "dotenv": "^16.0.3",
     "google-auth-library": "^8.7.0",
     "google-sheets": "^0.0.7",
-    "googleapis": "^110.0.0"
+    "googleapis": "^110.0.0",
+    "node-schedule": "^2.1.1"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.20.2",

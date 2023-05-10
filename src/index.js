@@ -2,6 +2,7 @@ const { Client, GatewayIntentBits, EmbedBuilder } = require(`discord.js`);
 const { google } = require("googleapis");
 require("dotenv").config();
 const config = require("./config");
+const schedule = require("node-schedule");
 
 // Create a new Discord client
 const client = new Client({
@@ -29,11 +30,18 @@ let messageToEdit;
 
 client.on("ready", () => {
   console.log(`Logged in as ${client.user.tag}!`);
+
+  // Schedule the script to run at 00:03 GMT
+  const updateJob = schedule.scheduleJob(
+    { hour: 0, minute: 3, tz: "Etc/GMT" },
+    () => {
+      console.log("Updating leaderboard at:", new Date());
+      getEmbed();
+    }
+  );
+
+  // Run the script once when the bot starts
   getEmbed();
-  // Fetch data from the Google Drive spreadsheet every hour
-  setInterval(async () => {
-    getEmbed();
-  }, 3600 * 1000); // 3600 * 1000 milliseconds = 1 hour
 });
 
 // Formats the leaderboard data
