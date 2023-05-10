@@ -1,17 +1,7 @@
 const { Client, GatewayIntentBits, EmbedBuilder } = require(`discord.js`);
 const { google } = require("googleapis");
 require("dotenv").config();
-
-const prefix = "!";
-
-// Replace with your Discord bot's token
-const DISCORD_BOT_TOKEN = process.env.DISCORD_TOKEN;
-
-// Replace with the ID of your Google Drive spreadsheet
-const SPREADSHEET_ID = "1ifq06TD9qtnrSM5psbPAENktSXRM60RGUOtmDrMJgvk";
-
-// Replace with your Google API credentials
-const credentials = require("./credentials.json");
+const config = require("./config");
 
 // Create a new Discord client
 const client = new Client({
@@ -22,8 +12,18 @@ const client = new Client({
   ],
 });
 
-// BOT LOGIN
-client.login(DISCORD_BOT_TOKEN);
+const initializeBot = async (DISCORD_TOKEN) => {
+  // BOT LOGIN
+  client.login(DISCORD_TOKEN);
+};
+
+const prefix = "!";
+
+// Replace with the ID of your Google Drive spreadsheet
+const SPREADSHEET_ID = "1ifq06TD9qtnrSM5psbPAENktSXRM60RGUOtmDrMJgvk";
+
+// Replace with your Google API credentials
+const credentials = require("./credentials.json");
 
 let messageToEdit;
 
@@ -41,7 +41,7 @@ function formatLeaderboard(rows, leaderboardEmbed) {
   let users = [];
   rows.forEach((row) => {
     // Create Array for user objects
-    users.push({ username: row[2], daysOfCoding: row[5] });
+    users.push({ username: row[1], daysOfCoding: row[4] });
   });
 
   // Create a new object that combines the daysOfCoding values for each unique username, keeping only the highest value
@@ -64,7 +64,6 @@ function formatLeaderboard(rows, leaderboardEmbed) {
   for (let i = 0; i < leaderboardArray.length; i++) {
     leaderboardArray[i].placement = i;
   }
-  console.log(leaderboardArray);
   // Leaderboard name/value constructor
   leaderboardArray.forEach((entry) => {
     if (entry.placement != 0 && entry.placement <= 10) {
@@ -113,8 +112,12 @@ function createEmbed() {
       url: "https://twitter.com/LearnWeb3DAO",
     })
     .setDescription("#100DaysOfCodeLW3")
-    .setThumbnail("https://i.imgur.com/2ZZl1H3.png")
-    .setImage("https://i.imgur.com/nfEDbrh.png")
+    .setThumbnail(
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Solidity_logo.svg/1200px-Solidity_logo.svg.png"
+    )
+    .setImage(
+      "https://media.discordapp.net/attachments/1102332669410426951/1102401851971870740/30DaysofSolidity.png?width=1200&height=480"
+    )
     .setTimestamp()
     .setFooter({
       text: "Last updated",
@@ -152,13 +155,13 @@ async function getEmbed() {
       .sheets({ version: "v4", auth })
       .spreadsheets.values.get({
         spreadsheetId: SPREADSHEET_ID,
-        range: "Sheet1!A1:F", // Replace with the range of cells you want to retrieve
+        range: "100DaysOfCode!A1:F", // Replace with the range of cells you want to retrieve
       });
     const data = response.data;
     const rows = data.values;
-
-    const channel = client.channels.cache.get("1048058181215064124");
-    const messageID = "1093680184529530881"; // Replace with channel ID from discord
+    const channelId = config.getChannelId();
+    const channel = client.channels.cache.get(channelId);
+    const messageID = config.getMessageId();
     const leaderboardEmbed = createEmbed();
     formatLeaderboard(rows, leaderboardEmbed);
 
@@ -181,3 +184,8 @@ async function getEmbed() {
     console.error(error);
   }
 }
+
+(async () => {
+  const DISCORD_TOKEN = config.getDiscordToken();
+  initializeBot(DISCORD_TOKEN);
+})();
