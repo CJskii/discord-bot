@@ -33,7 +33,7 @@ client.on("ready", () => {
   // Fetch data from the Google Drive spreadsheet every hour
   setInterval(async () => {
     getEmbed();
-  }, 300 * 1000); // 3600 * 1000 milliseconds = 1 hour
+  }, 3600 * 1000); // 3600 * 1000 milliseconds = 1 hour
 });
 
 // Formats the leaderboard data
@@ -41,7 +41,7 @@ function formatLeaderboard(rows, leaderboardEmbed) {
   let users = [];
   rows.forEach((row) => {
     // Create Array for user objects
-    users.push({ username: row[1], daysOfCoding: row[4] });
+    users.push({ username: row[2], daysOfCoding: row[5] });
   });
 
   // Create a new object that combines the daysOfCoding values for each unique username, keeping only the highest value
@@ -111,7 +111,7 @@ function createEmbed() {
         "https://pbs.twimg.com/profile_images/1583101110608400385/FkTz9xEl_400x400.jpg",
       url: "https://twitter.com/LearnWeb3DAO",
     })
-    .setDescription("#100DaysOfCodeLW3")
+    .setDescription("#30DaysOfSolidity")
     .setThumbnail(
       "https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Solidity_logo.svg/1200px-Solidity_logo.svg.png"
     )
@@ -155,7 +155,7 @@ async function getEmbed() {
       .sheets({ version: "v4", auth })
       .spreadsheets.values.get({
         spreadsheetId: SPREADSHEET_ID,
-        range: "100DaysOfCode!A1:F", // Replace with the range of cells you want to retrieve
+        range: "30DoS!A1:F", // Replace with the range of cells you want to retrieve
       });
     const data = response.data;
     const rows = data.values;
